@@ -27,7 +27,7 @@ export class CarSpecification {
   @Column({
     name: 'capacity',
     type: 'decimal',
-    precision: 4,
+    precision: 1000,
     scale: 2,
   })
   capacity: number;

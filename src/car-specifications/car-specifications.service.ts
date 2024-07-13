@@ -1,26 +1,72 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCarSpecificationDto } from './dto/create-car-specification.dto';
 import { UpdateCarSpecificationDto } from './dto/update-car-specification.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CarSpecification } from './entities/car-specification.entity';
+import { Repository } from 'typeorm';
+import { PaginationDto } from '../shared/dtos/pagination.dto';
 
 @Injectable()
 export class CarSpecificationsService {
-  create(createCarSpecificationDto: CreateCarSpecificationDto) {
-    return 'This action adds a new carSpecification';
+  constructor(
+    @InjectRepository(CarSpecification)
+    private readonly carSpecificationRepository: Repository<CarSpecification>,
+  ) {}
+
+  async create(createCarSpecificationDto: CreateCarSpecificationDto) {
+    const carSpecification = this.carSpecificationRepository.create(
+      createCarSpecificationDto,
+    );
+
+    return await this.carSpecificationRepository.save(carSpecification);
   }
 
-  findAll() {
-    return `This action returns all carSpecifications`;
+  async findAll(paginationDto: PaginationDto) {
+    const { limit = 10, page = 1 } = paginationDto;
+
+    const offset = (page - 1) * limit;
+
+    return await this.carSpecificationRepository.find({
+      skip: offset,
+      take: limit,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} carSpecification`;
+  async findOne(id: string) {
+    const carSpecification = await this.carSpecificationRepository.find({
+      where: {
+        id,
+      },
+    });
+
+    if (!carSpecification) {
+      throw new NotFoundException(
+        `Car specification with id: ${id} not found}`,
+      );
+    }
+
+    return carSpecification;
   }
 
-  update(id: number, updateCarSpecificationDto: UpdateCarSpecificationDto) {
-    return `This action updates a #${id} carSpecification`;
+  async update(
+    id: string,
+    updateCarSpecificationDto: UpdateCarSpecificationDto,
+  ) {
+    const carSpecification = await this.carSpecificationRepository.preload({
+      id,
+      ...updateCarSpecificationDto,
+    });
+
+    if (!carSpecification) {
+      throw new NotFoundException(
+        `Car specification with id: ${id} not found}`,
+      );
+    }
+
+    return await this.carSpecificationRepository.save(carSpecification);
   }
 
-  remove(id: number) {
+  async remove(id: string) {
     return `This action removes a #${id} carSpecification`;
   }
 }
