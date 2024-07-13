@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CarsModule } from './cars/cars.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { CarSpecificationsModule } from './car-specifications/car-specifications.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ConfigModule } from '@nestjs/config';
       synchronize: process.env.NODE_ENV !== 'production',
     }),
     CarsModule,
+    CarSpecificationsModule,
   ],
   controllers: [],
   providers: [],
